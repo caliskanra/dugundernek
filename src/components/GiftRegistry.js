@@ -121,27 +121,28 @@ export default function GiftRegistry({ projectId }) {
     height: 8,
     width: step === n ? 24 : 8,
     borderRadius: 4,
-    background: step > n ? "#1D9E75" : step === n ? "var(--primary)" : "rgba(0,0,0,0.1)",
+    background: step > n ? "#d4a373" : step === n ? "var(--primary)" : "rgba(212, 163, 115, 0.15)",
     transition: "all 0.3s",
   });
 
   const selCardStyle = (active) => ({
-    background: active ? "rgba(212, 163, 115, 0.1)" : "rgba(255, 255, 255, 0.5)",
-    border: active ? "2px solid var(--primary)" : "1px solid rgba(255, 255, 255, 0.7)",
+    background: active ? "rgba(212, 163, 115, 0.1)" : "rgba(255, 255, 255, 0.8)",
+    border: active ? "2px solid var(--primary)" : "1px solid rgba(212, 163, 115, 0.1)",
     borderRadius: "16px",
     padding: "1rem",
     cursor: "pointer",
-    transition: "all 0.15s",
+    transition: "all 0.2s ease",
+    boxShadow: active ? "0 5px 15px rgba(212, 163, 115, 0.1)" : "none",
   });
 
   const pillStyle = (active) => ({
-    padding: "6px 14px",
+    padding: "8px 16px",
     borderRadius: "20px",
-    border: active ? "1.5px solid var(--primary)" : "1px solid rgba(0,0,0,0.1)",
-    background: active ? "var(--primary)" : "transparent",
+    border: active ? "1.5px solid var(--primary)" : "1px solid rgba(212, 163, 115, 0.2)",
+    background: active ? "var(--primary)" : "#fff",
     color: active ? "#fff" : "var(--text-dark)",
-    cursor: "pointer", fontSize: 13, fontWeight: active ? 600 : 400,
-    transition: "all 0.15s",
+    cursor: "pointer", fontSize: 13, fontWeight: active ? 600 : 500,
+    transition: "all 0.2s",
   });
 
   return (
@@ -282,9 +283,9 @@ export default function GiftRegistry({ projectId }) {
       {/* STEP 3: PAYMENT */}
       {step === 3 && (
         <div>
-          <h3 style={{ fontSize: '1.2rem', marginBottom: '1.5rem', color: 'var(--text-light)' }}>Ödeme Tamamlama</h3>
+          <h3 style={{ fontSize: '1.2rem', marginBottom: '1.5rem', color: '#5c4d3c' }}>Ödeme Tamamlama</h3>
           
-          <div style={{ background: 'rgba(0,0,0,0.05)', padding: '15px', borderRadius: '15px', marginBottom: '1.5rem' }}>
+          <div style={{ background: 'rgba(212, 163, 115, 0.05)', padding: '20px', borderRadius: '20px', marginBottom: '1.5rem', border: '1px solid rgba(212, 163, 115, 0.1)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                <div>
                   <p style={{ margin: 0, fontWeight: 600 }}>{selType === "money" ? `${amount} ${currency}` : `${qty} adet ${selType === "gold" ? subtype : "bilezik"}`}</p>
@@ -331,13 +332,13 @@ export default function GiftRegistry({ projectId }) {
         </div>
       )}
 
-      {/* STEP 4: SUCCESS */}
+       {/* STEP 4: SUCCESS */}
       {step === 4 && (
-        <div style={{ textAlign: "center", padding: "1rem 0" }}>
-          <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#dcedc8", color: "#33691e", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, margin: "0 auto 1.5rem" }}>✓</div>
-          <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: 'var(--text-light)' }}>Teşekkürler!</h2>
-          <p style={{ opacity: 0.8, marginBottom: '2rem' }}>Takınız ve güzel dilekleriniz başarıyla ulaştırıldı.</p>
-          <button className="btn-primary" onClick={resetForm}>Yeni Bir Takı Gönder</button>
+        <div style={{ textAlign: "center", padding: "2rem 0" }}>
+          <div style={{ width: 80, height: 80, borderRadius: "50%", background: "#fdfcf8", color: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, margin: "0 auto 2rem", boxShadow: '0 10px 20px rgba(0,0,0,0.05)' }}>✨</div>
+          <h2 style={{ fontSize: '1.8rem', marginBottom: '1rem', color: '#5c4d3c' }}>Zerafetiniz İçin Teşekkürler</h2>
+          <p style={{ opacity: 0.7, marginBottom: '2.5rem', lineHeight: '1.6' }}>Değerli takınız ve güzel dilekleriniz <br />çiftimize sevgiyle ulaştırıldı.</p>
+          <button className="btn-primary" onClick={resetForm} style={{ padding: '15px 40px' }}>Yeni Bir Takı Gönder</button>
         </div>
       )}
     </div>

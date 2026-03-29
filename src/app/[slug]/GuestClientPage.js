@@ -57,15 +57,15 @@ export default function GuestClientPage({ project }) {
   const tabStyle = (active) => ({
     padding: '12px 20px',
     borderRadius: '50px',
-    border: active ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.1)',
-    background: active ? 'var(--primary-gradient)' : 'rgba(255,255,255,0.05)',
-    color: '#fff',
+    border: active ? '1px solid var(--primary)' : '1px solid rgba(212,163,115,0.1)',
+    background: active ? 'var(--primary-gradient)' : 'rgba(255,255,255,0.6)',
+    color: active ? '#fff' : 'var(--text-dark)',
     fontWeight: 600,
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     flex: 1,
     fontSize: '0.9rem',
-    boxShadow: active ? '0 4px 15px rgba(255, 77, 148, 0.3)' : 'none'
+    boxShadow: active ? '0 4px 15px rgba(212, 163, 115, 0.2)' : 'none'
   });
 
   const handleCopy = () => {
@@ -109,7 +109,7 @@ export default function GuestClientPage({ project }) {
       </div>
 
       {/* Tab Switcher */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.03)', padding: '5px', borderRadius: '50px', border: '1px solid rgba(255,255,255,0.05)' }}>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.3)', padding: '5px', borderRadius: '50px', border: '1px solid rgba(255,255,255,0.5)' }}>
         <button style={tabStyle(activeTab === "message")} onClick={() => setActiveTab("message")}>Anı Bırak</button>
         {project.isGiftEnabled && <button style={tabStyle(activeTab === "gift")} onClick={() => setActiveTab("gift")}>Takı Gönder</button>}
         <button style={tabStyle(activeTab === "flower")} onClick={() => setActiveTab("flower")}>Çiçek / Çelenk</button>
@@ -120,15 +120,15 @@ export default function GuestClientPage({ project }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
           {/* Guestbook Card */}
           <div>
-            <h2 style={{ textAlign: 'center', marginBottom: '1.5rem', color: '#fff' }}>Anı Duvarı</h2>
+            <h2 style={{ textAlign: 'center', marginBottom: '1.5rem', color: '#5c4d3c' }}>Anı Duvarı</h2>
             {project.messages.length === 0 ? (
               <p style={{ textAlign: 'center', opacity: 0.5 }}>Henüz anı paylaşılmamış. İlk mesajı siz bırakın!</p>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
                 {project.messages.map(msg => (
-                  <div key={msg.id} className="glass-panel" style={{ padding: '20px' }}>
-                    <h4 style={{ color: 'var(--primary)', marginBottom: '10px', fontSize: '1.2rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px' }}>{msg.guestName}</h4>
-                    <p style={{ marginBottom: '15px', fontStyle: 'italic', lineHeight: '1.5', opacity: 0.9 }}>"{msg.message}"</p>
+                  <div key={msg.id} className="glass-panel" style={{ padding: '20px', background: 'rgba(255,255,255,0.9)' }}>
+                    <h4 style={{ color: 'var(--primary)', marginBottom: '10px', fontSize: '1.2rem', borderBottom: '1px solid rgba(212,163,115,0.1)', paddingBottom: '10px' }}>{msg.guestName}</h4>
+                    <p style={{ marginBottom: '15px', fontStyle: 'italic', lineHeight: '1.5', color: 'var(--text-dark)' }}>"{msg.message}"</p>
                     {msg.mediaUrl && (
                       <div style={{ marginTop: 'auto' }}>
                         {msg.mediaUrl.match(/\.(mp4|webm)$/i) ? (
