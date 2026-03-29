@@ -8,8 +8,11 @@ export async function POST(req, { params }) {
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    const isAdmin = session.user.email === "caliskanra@gmail.com";
+    const where = isAdmin ? { id: params.id } : { id: params.id, userId: session.user.id };
+
     const project = await prisma.weddingProject.findUnique({
-      where: { id: params.id, userId: session.user.id }
+      where
     });
 
     if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });

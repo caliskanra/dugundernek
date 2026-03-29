@@ -14,7 +14,8 @@ export async function POST(req, { params }) {
       include: { project: true }
     });
 
-    if (!message || message.project.userId !== session.user.id) {
+    const isAdmin = session.user.email === "caliskanra@gmail.com";
+    if (!message || (!isAdmin && message.project.userId !== session.user.id)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

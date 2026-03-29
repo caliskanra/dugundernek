@@ -10,8 +10,11 @@ export default async function ProjectDetail({ params }) {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/");
 
+  const isAdmin = session.user.email === "caliskanra@gmail.com";
+  const where = isAdmin ? { id: params.id } : { id: params.id, userId: session.user.id };
+
   const project = await prisma.weddingProject.findUnique({
-    where: { id: params.id, userId: session.user.id },
+    where,
     include: {
       messages: { orderBy: { createdAt: 'desc' } },
       gifts: { orderBy: { createdAt: 'desc' } }
