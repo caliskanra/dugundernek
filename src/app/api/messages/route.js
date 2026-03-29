@@ -1,3 +1,6 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { hasProfanity, cleanProfanity } from "@/lib/filter";
 import fs from "fs/promises";
 import path from "path";
 import { sendNotificationEmail } from "@/lib/email";
