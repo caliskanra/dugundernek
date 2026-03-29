@@ -16,8 +16,19 @@ export default function GuestClientPage({ project }) {
     setSuccess(false);
 
     const formData = new FormData(e.target);
-    formData.append("projectId", project.id);
     
+    // iOS Safari Formdata + Non-ASCII filename bug fix:
+    const mediaFile = formData.get("media");
+    if (mediaFile && mediaFile.size > 0 && mediaFile.name) {
+      // Dosya adındaki Türkçe/özel karakterleri temizle veya tamamen güvenli bir isim ver
+      const safeExt = mediaFile.name.split('.').pop() || 'jpg';
+      const safeName = `media-${Date.now()}.${safeExt}`;
+      const safeFile = new File([mediaFile], safeName, { type: mediaFile.type });
+      formData.set("media", safeFile);
+    }
+
+    formData.append("projectId", project.id);
+
     try {
       const res = await fetch("/api/messages", {
         method: "POST",

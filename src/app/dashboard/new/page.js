@@ -16,6 +16,15 @@ export default function NewProject() {
 
     const formData = new FormData(e.target);
     
+    // iOS Safari Formdata + Non-ASCII filename bug fix:
+    const mediaFile = formData.get("media");
+    if (mediaFile && mediaFile.size > 0 && mediaFile.name) {
+      const safeExt = mediaFile.name.split('.').pop() || 'jpg';
+      const safeName = `media-${Date.now()}.${safeExt}`;
+      const safeFile = new File([mediaFile], safeName, { type: mediaFile.type });
+      formData.set("media", safeFile);
+    }
+
     try {
       const res = await fetch("/api/projects", {
         method: "POST",
