@@ -14,15 +14,17 @@ export default function NewProject() {
     setLoading(true);
     setError("");
 
-    const formData = new FormData(e.target);
-    
-    // iOS Safari Formdata + Non-ASCII filename bug fix:
-    const mediaFile = formData.get("media");
-    if (mediaFile && mediaFile.size > 0 && mediaFile.name) {
-      const safeExt = mediaFile.name.split('.').pop() || 'jpg';
-      const safeName = `media-${Date.now()}.${safeExt}`;
-      const safeFile = new File([mediaFile], safeName, { type: mediaFile.type });
-      formData.set("media", safeFile);
+    const formData = new FormData();
+    formData.append("brideName", e.target.brideName.value);
+    formData.append("groomName", e.target.groomName.value);
+    formData.append("welcomeMessage", e.target.welcomeMessage.value);
+
+    const mediaInput = e.target.media;
+    if (mediaInput && mediaInput.files && mediaInput.files.length > 0) {
+      const file = mediaInput.files[0];
+      const safeExt = file.name.split('.').pop() || 'jpg';
+      // iOS Safari blob bypass
+      formData.append("media", file, `media-${Date.now()}.${safeExt}`);
     }
 
     try {

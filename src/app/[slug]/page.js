@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+export const dynamic = 'force-dynamic';
 import GuestClientPage from "./GuestClientPage";
 
 export default async function PublicGuestPage({ params }) {

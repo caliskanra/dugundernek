@@ -8,7 +8,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/projects")
+    fetch("/api/projects", { cache: "no-store", headers: { 'Cache-Control': 'no-cache' } })
       .then((res) => res.json())
       .then((data) => {
         setProjects(data.projects || []);
