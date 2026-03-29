@@ -1,8 +1,6 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { hasProfanity, cleanProfanity } from "@/lib/filter";
 import fs from "fs/promises";
 import path from "path";
+import { sendNotificationEmail } from "@/lib/email";
 
 export async function POST(req) {
   try {
@@ -51,6 +49,16 @@ export async function POST(req) {
         status: "pending" // Always requires host approval
       }
     });
+
+    // Send Notification Email (Async - don't wait for it to finish to respond to user)
+    const project = await prisma.weddingProject.findUnique({
+      where: { id: projectId },
+      include: { user: true }
+    });
+
+    if (project) {
+      sendNotificationEmail(project, guestName, message).catch(err => console.error("Email notification failed:", err));
+    }
 
     return NextResponse.json({ success: true, newMsg });
   } catch (err) {
