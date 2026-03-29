@@ -29,6 +29,8 @@ export async function POST(req) {
     const brideName = formData.get("brideName");
     const groomName = formData.get("groomName");
     const welcomeMessage = formData.get("welcomeMessage");
+    const venueAddress = formData.get("venueAddress");
+    const weddingDate = formData.get("weddingDate");
     const media = formData.get("media");
 
     let mediaUrl = null;
@@ -78,6 +80,8 @@ export async function POST(req) {
         brideName,
         groomName,
         welcomeMessage,
+        venueAddress: venueAddress || "Belirtilmedi",
+        weddingDate: weddingDate ? new Date(weddingDate) : null,
         mediaUrl,
         slug: finalSlug
       }

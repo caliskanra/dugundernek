@@ -18,6 +18,8 @@ export default function NewProject() {
     formData.append("brideName", e.target.brideName.value);
     formData.append("groomName", e.target.groomName.value);
     formData.append("welcomeMessage", e.target.welcomeMessage.value);
+    formData.append("venueAddress", e.target.venueAddress.value);
+    formData.append("weddingDate", e.target.weddingDate.value);
 
     const mediaInput = e.target.media;
     if (mediaInput && mediaInput.files && mediaInput.files.length > 0) {
@@ -66,6 +68,21 @@ export default function NewProject() {
             <label>Erkek İsmi (Damat)</label>
             <input type="text" name="groomName" className="form-control" required placeholder="Örn: Ahmet" />
           </div>
+        </div>
+
+        <div className="form-group">
+          <label>Düğün / Nikah Tarihi</label>
+          <input type="date" name="weddingDate" className="form-control" />
+        </div>
+
+        <div className="form-group">
+          <label>Düğün / Nikah Salonu Adresi (Çiçek Gönderimi ve Ulaşım İçin)</label>
+          <textarea 
+            name="venueAddress" 
+            className="form-control" 
+            required 
+            placeholder="Misafirlerinize çiçek/çelenk gönderebilmesi için detaylı adres yazın..."
+          ></textarea>
         </div>
 
         <div className="form-group">

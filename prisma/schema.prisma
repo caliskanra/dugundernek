@@ -60,6 +60,8 @@ model WeddingProject {
   mediaUrl       String? // Optional welcome video/photo
   slug           String   @unique // The unique hostname.com.tr/bride&groomDDMMYYYY
   isGiftEnabled  Boolean  @default(true)
+  venueAddress   String   @default("Belirtilmedi")
+  weddingDate    DateTime?
   createdAt      DateTime @default(now())
 
   user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
