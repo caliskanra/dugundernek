@@ -1,0 +1,97 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  projects      WeddingProject[]
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  @@unique([identifier, token])
+}
+
+model WeddingProject {
+  id             String   @id @default(cuid())
+  userId         String
+  brideName      String
+  groomName      String
+  welcomeMessage String
+  mediaUrl       String? // Optional welcome video/photo
+  slug           String   @unique // The unique hostname.com.tr/bride&groomDDMMYYYY
+  isGiftEnabled  Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages GuestMessage[]
+  gifts    Gift[]
+}
+
+model GuestMessage {
+  id        String   @id @default(cuid())
+  projectId String
+  guestName String
+  message   String
+  mediaUrl  String?  // Optional uploaded photo/video
+  status    String   @default("pending") // pending, approved, rejected
+  createdAt DateTime @default(now())
+
+  project WeddingProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Gift {
+  id          String   @id @default(cuid())
+  projectId   String
+  type        String   // gold, bracelet, money, wish
+  subtype     String?  // çeyrek, yarım, tam
+  quantity    Int      @default(1)
+  currency    String?  // TRY, USD, EUR
+  amount      Float?
+  message     String?
+  value       Float    // Equivalent value in TRY at time of gift
+  senderName  String
+  status      String   @default("pending") // pending, paid, confirmed
+  createdAt   DateTime @default(now())
+
+  project WeddingProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
