@@ -35,11 +35,9 @@ export default function GiftRegistry({ projectId }) {
   const [name, setName] = useState("");
   const [msg, setMsg] = useState("");
   const [payMethod, setPayMethod] = useState("card");
-  const [cardNum, setCardNum] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
+  const [checkoutForm, setCheckoutForm] = useState(null); // iyzico Script content
 
   function computeValue() {
     if (selType === "gold") return (goldPrices[subtype] || 0) * qty;
@@ -53,6 +51,33 @@ export default function GiftRegistry({ projectId }) {
     setError("");
     
     try {
+      // Eğer ödeme yöntemi Kredi Kartı ise iyzico'yu başlat
+      if (selType !== "wish" && payMethod === "card") {
+        const res = await fetch("/api/gifts/pay", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            projectId,
+            senderName: name,
+            type: selType,
+            subtype,
+            quantity: qty,
+            currency,
+            amount: parseFloat(amount) || 0,
+            message: msg,
+            value: computeValue(),
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Ödeme başlatılamadı");
+
+        // iyzico formunu ekrana ver
+        setCheckoutForm(data.checkoutFormContent);
+        return; // Redirect iyzico frame'i içinde olacak
+      }
+
+      // Diğer durumlar (Mesaj veya Havale - manuel onay gerektirir)
       const res = await fetch("/api/gifts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -66,6 +91,7 @@ export default function GiftRegistry({ projectId }) {
           amount: parseFloat(amount) || 0,
           message: msg,
           value: computeValue(),
+          status: payMethod === "transfer" ? "pending_transfer" : "pending"
         })
       });
 
@@ -82,20 +108,14 @@ export default function GiftRegistry({ projectId }) {
   function resetForm() {
     setStep(1); setSelType(null); setSubtype("çeyrek"); setQty(1);
     setCurrency("TRY"); setAmount(""); setName(""); setMsg("");
-    setCardNum(""); setExpiry(""); setCvv(""); setProcessing(false); setError("");
-  }
-
-  function fmtCard(v) { return v.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim(); }
-  function fmtExpiry(v) {
-    const c = v.replace(/\D/g, "").slice(0, 4);
-    return c.length >= 3 ? c.slice(0, 2) + "/" + c.slice(2) : c;
+    setProcessing(false); setError(""); setCheckoutForm(null);
   }
 
   const canStep2 = !!selType;
   const canStep3 = name.trim().length >= 2 && (selType === "wish" || computeValue() > 0);
   const canPay = selType === "wish"
     || payMethod === "transfer"
-    || (cardNum.replace(/\s/g, "").length === 16 && expiry.length === 5 && cvv.length === 3);
+    || payMethod === "card";
 
   const dotStyle = (n) => ({
     height: 8,
@@ -280,12 +300,13 @@ export default function GiftRegistry({ projectId }) {
           </div>
 
           {payMethod === "card" ? (
-            <div style={{ display: 'grid', gap: '10px', marginBottom: '1.5rem' }}>
-              <input type="text" className="form-control" value={cardNum} onChange={e => setCardNum(fmtCard(e.target.value))} placeholder="Kart Numarası" />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <input type="text" className="form-control" value={expiry} onChange={e => setExpiry(fmtExpiry(e.target.value))} placeholder="AA/YY" />
-                <input type="text" className="form-control" value={cvv} onChange={e => setCvv(e.target.value.replace(/\D/g, "").slice(0, 3))} placeholder="CVV" maxLength={3} />
-              </div>
+            <div style={{ padding: '20px', textAlign: 'center', border: '1px dashed rgba(0,0,0,0.1)', borderRadius: '15px' }}>
+               <p style={{ margin: 0, fontSize: '13px', opacity: 0.7 }}>Kredi kartı bilgileriniz iyzico güvenli ödeme altyapısı ile korunmaktadır.</p>
+               {checkoutForm && (
+                 <div style={{ marginTop: '20px' }}>
+                    <div id="iyzipay-checkout-form" className="responsive" dangerouslySetInnerHTML={{ __html: checkoutForm }} />
+                 </div>
+               )}
             </div>
           ) : (
             <div style={{ background: 'rgba(255,255,255,0.4)', padding: '15px', borderRadius: '12px', marginBottom: '1.5rem', fontSize: '13px', lineHeight: '1.6' }}>

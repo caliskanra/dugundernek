@@ -1,13 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import GiftRegistry from "@/components/GiftRegistry";
 
 export default function GuestClientPage({ project }) {
+  const searchParams = useSearchParams();
+  const paymentStatus = searchParams.get("payment");
+  const paymentError = searchParams.get("error");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState("message");
+  const [activeTab, setActiveTab] = useState(paymentStatus ? "gift" : "message");
+
+  // Eğer ödeme başarılıysa sekmeyi "Takı Gönder"e sabitleyip bir süre sonra query'i temizleyebiliriz
+  // Şimdilik sadece mesaj tabından başlatmamak yeterli.
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -61,6 +68,18 @@ export default function GuestClientPage({ project }) {
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', width: '100%' }}>
+      {/* Payment Feedback */}
+      {paymentStatus === "success" && (
+        <div style={{ background: '#dcedc8', padding: '15px', borderRadius: '15px', color: '#33691e', marginBottom: '1.5rem', textAlign: 'center', fontWeight: 600 }}>
+          Takınız başarıyla ulaştırıldı. Teşekkür ederiz!
+        </div>
+      )}
+      {paymentStatus === "failed" && (
+        <div style={{ background: '#ffcdd2', padding: '15px', borderRadius: '15px', color: '#b71c1c', marginBottom: '1.5rem', textAlign: 'center', fontWeight: 600 }}>
+          Ödeme başarısız oldu: {paymentError || "Lütfen tekrar deneyin."}
+        </div>
+      )}
+
       {/* Welcome Hero */}
       <div className="glass-panel" style={{ textAlign: 'center', marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '3rem', color: 'var(--primary)', marginBottom: '1rem' }}>

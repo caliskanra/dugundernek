@@ -90,8 +90,10 @@ model Gift {
   message     String?
   value       Float    // Equivalent value in TRY at time of gift
   senderName  String
-  status      String   @default("pending") // pending, paid, confirmed
-  createdAt   DateTime @default(now())
+  paymentToken String?   @unique // iyzico session token
+  paymentId    String?   // iyzico unique payment id
+  status       String   @default("pending") // pending, paid, failed, confirmed
+  createdAt    DateTime @default(now())
 
   project WeddingProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
