@@ -70,13 +70,15 @@ model WeddingProject {
 }
 
 model GuestMessage {
-  id        String   @id @default(cuid())
-  projectId String
-  guestName String
-  message   String
-  mediaUrl  String?  // Optional uploaded photo/video
-  status    String   @default("pending") // pending, approved, rejected
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  projectId    String
+  guestName    String
+  guestUserId  String?  // Google Auth user id
+  guestEmail   String?  // Google Auth email
+  message      String
+  mediaUrl     String?  // Optional uploaded photo/video
+  status       String   @default("pending") // pending, approved, rejected
+  createdAt    DateTime @default(now())
 
   project WeddingProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
@@ -92,10 +94,31 @@ model Gift {
   message     String?
   value       Float    // Equivalent value in TRY at time of gift
   senderName  String
+  senderUserId String? // Google Auth user id
+  senderEmail  String? // Google Auth email
   paymentToken String?   @unique // iyzico session token
   paymentId    String?   // iyzico unique payment id
   status       String   @default("pending") // pending, paid, failed, confirmed
   createdAt    DateTime @default(now())
 
   project WeddingProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+// 5651 Sayılı Kanun Uyumlu Yasal Log
+model LegalLog {
+  id            String   @id @default(cuid())
+  action        String   // POST_MESSAGE, POST_GIFT, LOGIN
+  userId        String?  // Google Auth user id
+  userName      String?
+  userEmail     String?
+  ipAddress     String?
+  userAgent     String?
+  projectId     String?
+  originalContent String? // Filtrelenmemiş orijinal içerik
+  filteredContent String? // Filtreden geçmiş içerik
+  hadProfanity  Boolean  @default(false)
+  resourceId    String?  // GuestMessage or Gift id
+  resourceType  String?  // message, gift
+  metadata      String?  // JSON string for extra data
+  createdAt     DateTime @default(now())
 }

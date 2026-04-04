@@ -1,12 +1,27 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hasProfanity, cleanProfanity } from "@/lib/filter";
+import { createLegalLog, extractRequestInfo } from "@/lib/legalLog";
 import fs from "fs/promises";
 import path from "path";
 import { sendNotificationEmail } from "@/lib/email";
 
 export async function POST(req) {
   try {
+    // 5651: Session kontrolü — Google ile giriş zorunlu
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: "Yorum yapmak için Google ile giriş yapmalısınız." },
+        { status: 401 }
+      );
+    }
+
+    // 5651: IP ve User-Agent bilgilerini al
+    const { ipAddress, userAgent } = extractRequestInfo(req);
+
     const formData = await req.formData();
     const projectId = formData.get("projectId");
     const guestNameRaw = formData.get("guestName");
@@ -15,12 +30,6 @@ export async function POST(req) {
 
     if (!projectId || !guestNameRaw) {
       return NextResponse.json({ error: "Eksik bilgi" }, { status: 400 });
-    }
-
-    // Profanity Check
-    if (hasProfanity(guestNameRaw) || hasProfanity(messageRaw)) {
-      // You can either reject entirely or clean it. We will clean it and flag it.
-      // But the requirement says "uygunsa kayıt edilecek", so we just clean it and save it as pending
     }
 
     const guestName = cleanProfanity(guestNameRaw);
@@ -33,12 +42,11 @@ export async function POST(req) {
         const buffer = Buffer.from(bytes);
         const filename = `msg-${Date.now()}-${media.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
         const uploadDir = path.join(process.cwd(), "public", "uploads");
-        
         await fs.mkdir(uploadDir, { recursive: true });
         await fs.writeFile(path.join(uploadDir, filename), buffer);
         mediaUrl = `/uploads/${filename}`;
       } catch (uploadError) {
-        console.warn("Vercel dosya yazma hatası atlandı:", uploadError.message);
+        console.warn("Dosya yazma hatası:", uploadError.message);
         mediaUrl = null;
       }
     }
@@ -47,18 +55,34 @@ export async function POST(req) {
       data: {
         projectId,
         guestName,
+        guestUserId: session.user.id || null,
+        guestEmail: session.user.email || null,
         message,
         mediaUrl,
-        status: "pending" // Always requires host approval
+        status: "pending"
       }
     });
 
-    // Send Notification Email (Async - don't wait for it to finish to respond to user)
+    // 5651: Yasal log kaydı
+    await createLegalLog({
+      action: "POST_MESSAGE",
+      userId: session.user.id,
+      userName: session.user.name || guestNameRaw,
+      userEmail: session.user.email,
+      ipAddress,
+      userAgent,
+      projectId,
+      originalContent: `İsim: ${guestNameRaw} | Mesaj: ${messageRaw}`,
+      filteredContent: `İsim: ${guestName} | Mesaj: ${message}`,
+      resourceId: newMsg.id,
+      resourceType: "message",
+    });
+
+    // E-posta bildirimi
     const project = await prisma.weddingProject.findUnique({
       where: { id: projectId },
       include: { user: true }
     });
-
     if (project) {
       sendNotificationEmail(project, guestName, message).catch(err => console.error("Email notification failed:", err));
     }
